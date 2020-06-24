@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6823903998721948996}
   - component: {fileID: 6823903998721948993}
   m_Layer: 0
-  m_Name: gem
+  m_Name: pink
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95,7 +95,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 256ccd7583edf664db2e7e987865fd5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprites: []
+  val: 3
 --- !u!114 &6823903998721948993
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,3 +108,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebec7a8b3e01724449c12164dc9924b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameGrid: []
