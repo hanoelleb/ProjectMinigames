@@ -17,10 +17,16 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     Gem holding;
 
     SpriteRenderer bg;
-    SpriteRenderer gem;
+    //SpriteRenderer gem;
     SpriteRenderer selected;
 
     int index;
+
+    [SerializeField]
+    Gem gem;
+
+    [SerializeField]
+    Transform gemTransform;
 
     // Start is called before the first frame update
     void Start()
@@ -29,13 +35,13 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
 
         var gemIndex = rand.Next(0, gems.Count);
         holding = gems[gemIndex];
+        gem = Instantiate(holding, transform.localPosition, Quaternion.identity);
+        gem.transform.parent = this.transform;
+        gemTransform = gem.transform;
 
         gameGrid = GetComponentInParent<GameGrid>();
 
         bg = GetComponent<SpriteRenderer>();
-
-        gem = transform.Find("Gem").GetComponent<SpriteRenderer>();
-        gem.sprite = holding.getSprite();
 
         selected = transform.Find("selected").GetComponent<SpriteRenderer>();
     }
@@ -44,12 +50,13 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void OnPointerClick(PointerEventData data)
     {
         gameGrid.setCurrent(this);
+        //print(holding.getVal());
     }
 
     public int getIndex()
@@ -64,19 +71,19 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
 
     public Gem getGem()
     {
-        return holding;
+        return gem;
     }
 
     public void setGem(Gem newGem)
     {
         if (newGem)
         {
-            holding = newGem;
-            gem.sprite = holding.getSprite();
+            gem = newGem;
+            gemTransform = gem.transform;
         } else
         {
-            holding = null;
-            gem.sprite = null;
+            gem  = null;
+            gemTransform = null;
         }
     }
 
@@ -88,7 +95,8 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     public void randomGem()
     {
         holding = gems[rand.Next(0, gems.Count)];
-        gem.sprite = holding.getSprite();
+        gem = Instantiate(holding, transform.localPosition, Quaternion.identity);
+        gem.transform.parent = this.transform;
     }
 
     public void setSelected(bool isSelected)
@@ -96,5 +104,13 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
         selected.enabled = isSelected;
     }
 
+    public int getGemVal()
+    {
+        return gem.getVal();
+    }
 
+    public Transform getGemTransform()
+    {
+        return gemTransform;
+    }
 }

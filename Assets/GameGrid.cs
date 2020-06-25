@@ -26,12 +26,14 @@ public class GameGrid : MonoBehaviour
         {
             gameGrid[i].setIndex(i);
         }
+
+        //setUp();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+           
     }
 
     public void setCurrent(gameTile update)
@@ -48,6 +50,7 @@ public class GameGrid : MonoBehaviour
                  (upIndex == currIndex - GRIDSIZE || upIndex == currIndex + GRIDSIZE))  //top or bottom
             {
                 isAdjacent = true;
+                print("isAdjacent");
                 current.setSelected(false);
                 current = null;
             }
@@ -59,10 +62,32 @@ public class GameGrid : MonoBehaviour
                 current.setSelected(true);
             } else
             {
-                Gem temp1 = gameGrid[currIndex].getGem();
+                Gem currGem = gameGrid[currIndex].getGem();
+                Gem upGem = gameGrid[upIndex].getGem();
+
+                Transform currGemTrans = gameGrid[currIndex].getGemTransform();
+                Transform upGemTrans = gameGrid[upIndex].getGemTransform();
+
+                currGemTrans.parent = gameGrid[upIndex].gameObject.transform;
+                upGemTrans.parent = gameGrid[currIndex].gameObject.transform;
+
+                gameGrid[upIndex].setGem(currGem);
+                gameGrid[currIndex].setGem(upGem);
+
+                checkBoard();
+                //currGem.gameObject.GetComponent<Gem>().setParent(upIndex);
+                /*
                 gameGrid[currIndex].setGem(gameGrid[upIndex].getGem());
                 gameGrid[upIndex].setGem(temp1);
-                checkBoard();
+                List<int> indices = checkBoard();
+                if (indices.Count == 0)
+                {
+                    //no match, switch back
+                    Gem temp2 = gameGrid[currIndex].getGem();
+                    gameGrid[currIndex].setGem(gameGrid[upIndex].getGem());
+                    gameGrid[upIndex].setGem(temp2);
+                }
+                */
             }
         } 
         else
@@ -72,22 +97,12 @@ public class GameGrid : MonoBehaviour
         }
     }
 
-    void checkBoard()
+    List<int> checkBoard()
     {
         List<int> indices = new List<int>();
         for (int i = 0; i < gameGrid.Length; i++)
         {
-            /*
-            if (i - GRIDSIZE * 2 >= 0 && i > 12)
-            {
-                bool up = checkUp(i);
-                if (up)
-                {
-                    gameGrid[i].setBg(backTileSprites[1]);
-                    gameGrid[i - GRIDSIZE].setBg(backTileSprites[1]);
-                    gameGrid[i - GRIDSIZE*2].setBg(backTileSprites[1]);
-                }
-            } */
+            
             if (i - GRIDSIZE * 2 <= GRIDSIZE * GRIDSIZE && i < 24)
             {
                 bool down = checkDown(i);
@@ -100,10 +115,9 @@ public class GameGrid : MonoBehaviour
                     indices.Add(i);
                     indices.Add(i + GRIDSIZE);
                     indices.Add(i + GRIDSIZE*2);
-
                 }
             }
-            if ((i + 1) % GRIDSIZE != 1 && (i + 2) % GRIDSIZE != 1 && i < 34)
+            if ((i + 1) % GRIDSIZE != 0 && (i + 2) % GRIDSIZE != 1 && i < 34)
             {
                 bool right = checkRight(i);
                 if (right)
@@ -117,49 +131,27 @@ public class GameGrid : MonoBehaviour
                     indices.Add(i + 2);
                 }
             }
-            /*
-            if ((i - 1) % GRIDSIZE != 0 && (i + 2) % GRIDSIZE != 0 && i > 1)
-            {
-                checkLeft(i);
-            }
-            */
+            
         }
 
-        removeBlocks(indices);
-    }
-
-    bool checkUp(int index)
-    {
-        int val1 = gameGrid[index].getGem().getVal();
-        int val2 = gameGrid[index - GRIDSIZE].getGem().getVal();
-        int val3 = gameGrid[index - GRIDSIZE * 2].getGem().getVal();
-
-        return val1 == val2 && val1 == val3;
+        //removeBlocks(indices);
+        return indices;
     }
 
     bool checkDown(int index)
     {
-        int val1 = gameGrid[index].getGem().getVal();
-        int val2 = gameGrid[index + GRIDSIZE].getGem().getVal();
-        int val3 = gameGrid[index + GRIDSIZE * 2].getGem().getVal();
-
-        return val1 == val2 && val1 == val3;
-    }
-
-    bool checkLeft(int index)
-    {
-        int val1 = gameGrid[index].getGem().getVal();
-        int val2 = gameGrid[index - 1].getGem().getVal();
-        int val3 = gameGrid[index - 2].getGem().getVal();
+        int val1 = gameGrid[index].getGemVal();
+        int val2 = gameGrid[index + GRIDSIZE].getGemVal();
+        int val3 = gameGrid[index + GRIDSIZE * 2].getGemVal();
 
         return val1 == val2 && val1 == val3;
     }
 
     bool checkRight(int index)
     {
-        int val1 = gameGrid[index].getGem().getVal();
-        int val2 = gameGrid[index + 1].getGem().getVal();
-        int val3 = gameGrid[index + 2].getGem().getVal();
+        int val1 = gameGrid[index].getGemVal();
+        int val2 = gameGrid[index + 1].getGemVal();
+        int val3 = gameGrid[index + 2].getGemVal();
 
         return val1 == val2 && val1 == val3;
     }
@@ -187,15 +179,16 @@ public class GameGrid : MonoBehaviour
         {
             if (gameGrid[i].getGem() == null)
             {
-                int findUp = i - 6;
+                int findUp = i - GRIDSIZE;
                 while (findUp >= 0)
                 {
                     if (gameGrid[findUp].getGem() != null)
                     {
                         gameGrid[i].setGem(gameGrid[findUp].getGem());
                         gameGrid[findUp].setGem(null);
+                        break;
                     }
-                    findUp -= 6;
+                    findUp -= GRIDSIZE;
                 }
 
                 if (gameGrid[i].getGem() == null) //no gems available above
@@ -205,4 +198,22 @@ public class GameGrid : MonoBehaviour
             }
         }
     }
+
+    void setUp() //prevents initiating with matches
+    {
+        List<int> indices = checkBoard();
+
+        bool hasMatches = indices.Count != 0;
+
+        while (hasMatches) //has matches
+        {
+            for (int i = 0; i < indices.Count; i++)
+            {
+                gameGrid[indices[i]].randomGem();
+            }
+
+            hasMatches = checkBoard().Count != 0;
+        }
+    }
+
 }
