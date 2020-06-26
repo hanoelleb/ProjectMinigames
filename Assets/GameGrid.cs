@@ -27,7 +27,7 @@ public class GameGrid : MonoBehaviour
             gameGrid[i].setIndex(i);
         }
 
-        //setUp();
+        setUp();
     }
 
     // Update is called once per frame
@@ -74,7 +74,7 @@ public class GameGrid : MonoBehaviour
                 gameGrid[upIndex].setGem(currGem);
                 gameGrid[currIndex].setGem(upGem);
 
-                checkBoard();
+                checkBoard(false);
                 //currGem.gameObject.GetComponent<Gem>().setParent(upIndex);
                 /*
                 gameGrid[currIndex].setGem(gameGrid[upIndex].getGem());
@@ -97,7 +97,7 @@ public class GameGrid : MonoBehaviour
         }
     }
 
-    List<int> checkBoard()
+    List<int> checkBoard(bool setup)
     {
         List<int> indices = new List<int>();
         for (int i = 0; i < gameGrid.Length; i++)
@@ -134,7 +134,11 @@ public class GameGrid : MonoBehaviour
             
         }
 
-        //removeBlocks(indices);
+        if (!setup)
+        {
+            print("will remove");
+            removeBlocks(indices);
+        }
         return indices;
     }
 
@@ -156,18 +160,11 @@ public class GameGrid : MonoBehaviour
         return val1 == val2 && val1 == val3;
     }
 
-    IEnumerator Example()
-    {
-        yield return new WaitForSeconds(3);
-    }
-
     void removeBlocks(List<int> indices)
     {
-        StartCoroutine(Example());
-
         for (int i = 0; i < indices.Count; i++)
         {
-            gameGrid[indices[i]].setGem(null);
+            gameGrid[indices[i]].deleteGem();
         }
 
         moveDown();
@@ -182,9 +179,28 @@ public class GameGrid : MonoBehaviour
                 int findUp = i - GRIDSIZE;
                 while (findUp >= 0)
                 {
-                    if (gameGrid[findUp].getGem() != null)
+                    if (gameGrid[findUp].getGem() != null && gameGrid[findUp].getGemTransform() != null)
                     {
-                        gameGrid[i].setGem(gameGrid[findUp].getGem());
+                        /*Gem currGem = gameGrid[currIndex].getGem();
+                Gem upGem = gameGrid[upIndex].getGem();
+
+                Transform currGemTrans = gameGrid[currIndex].getGemTransform();
+                Transform upGemTrans = gameGrid[upIndex].getGemTransform();
+
+                currGemTrans.parent = gameGrid[upIndex].gameObject.transform;
+                upGemTrans.parent = gameGrid[currIndex].gameObject.transform;
+
+                gameGrid[upIndex].setGem(currGem);
+                gameGrid[currIndex].setGem(upGem);*/
+
+                        Gem foundGem = gameGrid[findUp].getGem();
+                        Transform foundTrans = gameGrid[findUp].getGemTransform();
+                        //Transform foundGem 
+
+                        foundTrans.parent = gameGrid[i].gameObject.transform;
+                        gameGrid[i].setGem(foundGem);
+
+                        //gameGrid[i].getGemTransform().position = ;
                         gameGrid[findUp].setGem(null);
                         break;
                     }
@@ -193,7 +209,7 @@ public class GameGrid : MonoBehaviour
 
                 if (gameGrid[i].getGem() == null) //no gems available above
                 {
-                    gameGrid[i].randomGem();
+                    gameGrid[i].randomGem(false);
                 }
             }
         }
@@ -201,7 +217,7 @@ public class GameGrid : MonoBehaviour
 
     void setUp() //prevents initiating with matches
     {
-        List<int> indices = checkBoard();
+        List<int> indices = checkBoard(true);
 
         bool hasMatches = indices.Count != 0;
 
@@ -209,10 +225,10 @@ public class GameGrid : MonoBehaviour
         {
             for (int i = 0; i < indices.Count; i++)
             {
-                gameGrid[indices[i]].randomGem();
+                gameGrid[indices[i]].randomGem(true);
             }
 
-            hasMatches = checkBoard().Count != 0;
+            hasMatches = checkBoard(true).Count != 0;
         }
     }
 

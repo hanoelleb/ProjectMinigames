@@ -92,11 +92,24 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
         bg.sprite = rep;
     }
 
-    public void randomGem()
+    public void randomGem(bool setUp)
     {
+        if (gem != null && gemTransform != null)
+            Destroy(gem.gameObject);
         holding = gems[rand.Next(0, gems.Count)];
-        gem = Instantiate(holding, transform.localPosition, Quaternion.identity);
+
+        //want to spawn above board;
+        float xPos = transform.localPosition.x;
+        float yPos = transform.localPosition.y + 40;
+
+        if (setUp)
+            gem = Instantiate(holding, transform.localPosition, Quaternion.identity);
+        else
+        {
+            gem = Instantiate(holding, new Vector3(xPos, yPos, 0), Quaternion.identity);
+        }
         gem.transform.parent = this.transform;
+        gemTransform = gem.transform;
     }
 
     public void setSelected(bool isSelected)
@@ -112,5 +125,12 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     public Transform getGemTransform()
     {
         return gemTransform;
+    }
+
+    public void deleteGem()
+    {
+        Destroy(gem.gameObject);
+        gem = null;
+        gemTransform = null;
     }
 }
