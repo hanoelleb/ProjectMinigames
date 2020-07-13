@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ public class GameGrid : MonoBehaviour
 
     [SerializeField]
     List<Sprite> backTileSprites;
+
+    bool canClick = true;
 
     // Start is called before the first frame update
     void Start()
@@ -34,6 +37,38 @@ public class GameGrid : MonoBehaviour
     void Update()
     {
            
+    }
+
+    IEnumerator NoMatchCoroutine(int currIndex, int upIndex)
+    {
+        canClick = false;
+        current = null;
+
+        Gem currGem = gameGrid[currIndex].getGem();
+        Gem upGem = gameGrid[upIndex].getGem();
+
+        Transform currGemTrans = gameGrid[currIndex].getGemTransform();
+        Transform upGemTrans = gameGrid[upIndex].getGemTransform();
+
+        //yield on a new YieldInstruction that waits for 5 seconds.
+        yield return new WaitForSeconds(1.5f);
+
+        currGemTrans.parent = gameGrid[upIndex].gameObject.transform;
+        upGemTrans.parent = gameGrid[currIndex].gameObject.transform;
+
+        gameGrid[upIndex].setGem(currGem);
+        gameGrid[currIndex].setGem(upGem);
+
+        //After we have waited 5 seconds print the time again.
+        Debug.Log("Finished Coroutine at timestamp : " + Time.time);
+
+        canClick = true;
+
+    }
+
+    IEnumerator DeleteCoroutine()
+    {
+        yield return new WaitForSeconds(1.5f);
     }
 
     public void setCurrent(gameTile update)
@@ -74,7 +109,31 @@ public class GameGrid : MonoBehaviour
                 gameGrid[upIndex].setGem(currGem);
                 gameGrid[currIndex].setGem(upGem);
 
-                checkBoard(false);
+                HashSet<int> matches = checkBoard(false);
+                if (matches.Count == 0)
+                    StartCoroutine(NoMatchCoroutine(currIndex, upIndex));
+                else
+                {
+                    moveDown();
+
+                    while (matches.Count != 0)
+                    {
+                        matches = checkBoard(false);
+                        moveDown();
+                    }
+                }
+                //swap back if no matches
+                /*
+                
+                if (matches.Count == 0)
+                {
+                    upGemTrans.parent = gameGrid[upIndex].gameObject.transform;
+                    currGemTrans.parent = gameGrid[currIndex].gameObject.transform;
+
+                    gameGrid[upIndex].setGem(upGem);
+                    gameGrid[currIndex].setGem(currGem);
+                }
+                */
                 //currGem.gameObject.GetComponent<Gem>().setParent(upIndex);
                 /*
                 gameGrid[currIndex].setGem(gameGrid[upIndex].getGem());
@@ -97,9 +156,9 @@ public class GameGrid : MonoBehaviour
         }
     }
 
-    List<int> checkBoard(bool setup)
+    HashSet<int> checkBoard(bool setup)
     {
-        List<int> indices = new List<int>();
+        HashSet<int> indices = new HashSet<int>();
         for (int i = 0; i < gameGrid.Length; i++)
         {
             
@@ -160,14 +219,22 @@ public class GameGrid : MonoBehaviour
         return val1 == val2 && val1 == val3;
     }
 
-    void removeBlocks(List<int> indices)
+    void removeBlocks(HashSet<int> indices)
     {
-        for (int i = 0; i < indices.Count; i++)
+
+        HashSet<int>.Enumerator indexEnum = indices.GetEnumerator();
+
+        while (indexEnum.MoveNext())
         {
-            gameGrid[indices[i]].deleteGem();
+            int current = indexEnum.Current;
+            gameGrid[current].deleteGem();
         }
 
-        moveDown();
+        //is repeating?
+        //for (int i = 0; i < indices.Count; i++)
+        //{
+        //    gameGrid[indices[i]].deleteGem();
+        //}
     }
 
     void moveDown()
@@ -213,23 +280,37 @@ public class GameGrid : MonoBehaviour
                 }
             }
         }
+
     }
 
     void setUp() //prevents initiating with matches
     {
-        List<int> indices = checkBoard(true);
+        HashSet<int> indices = checkBoard(true);
 
         bool hasMatches = indices.Count != 0;
 
         while (hasMatches) //has matches
         {
+            HashSet<int>.Enumerator indexEnum = indices.GetEnumerator();
+
+            while (indexEnum.MoveNext())
+            {
+                int current = indexEnum.Current;
+                gameGrid[current].randomGem(true);
+            }
+            /*
             for (int i = 0; i < indices.Count; i++)
             {
                 gameGrid[indices[i]].randomGem(true);
             }
-
+            */
             hasMatches = checkBoard(true).Count != 0;
         }
+    }
+
+    public bool getCanClick()
+    {
+        return canClick;
     }
 
 }

@@ -28,6 +28,8 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     Transform gemTransform;
 
+    bool willDelete = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -50,12 +52,23 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     // Update is called once per frame
     void Update()
     {
-
+        
+        if (willDelete && !holding.getMoving())
+        {
+            delete();
+            willDelete = false;
+        }
+        
     }
 
     public void OnPointerClick(PointerEventData data)
     {
-        gameGrid.setCurrent(this);
+        bool canClick = gameGrid.getCanClick();
+        print(canClick);
+        if (canClick)
+        {
+            gameGrid.setCurrent(this);
+        }
         //print(holding.getVal());
     }
 
@@ -128,6 +141,15 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     }
 
     public void deleteGem()
+    {
+        //if (gem && gem.gameObject)
+ 
+        Destroy(gem.gameObject);
+        gem = null;
+        gemTransform = null;
+    }
+
+    void delete()
     {
         Destroy(gem.gameObject);
         gem = null;

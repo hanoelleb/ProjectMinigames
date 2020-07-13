@@ -12,6 +12,8 @@ public class Gem : MonoBehaviour
 
     BoxCollider2D bc;
 
+    bool isMoving = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -21,10 +23,14 @@ public class Gem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-         if (transform.position != transform.parent.position)
+        if (transform.position != transform.parent.position)
         {
             transform.position = Vector3.MoveTowards(transform.position, transform.parent.position, 0.2f);
-        }  
+            isMoving = true;
+        } else
+        {
+            isMoving = false;
+        }
     }
 
     public int getVal()
@@ -45,6 +51,11 @@ public class Gem : MonoBehaviour
     bool SameGem( Gem other)
     {
         return other.getVal() == this.val;  
+    }
+
+    public bool getMoving()
+    {
+        return isMoving;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
