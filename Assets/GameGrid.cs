@@ -261,26 +261,21 @@ public class GameGrid : MonoBehaviour
 
     void moveDown()
     {
+        int[] heights = new int[6] { 0, 0, 0, 0, 0, 0 };
+
         for (int i = 35; i >= 0; i--)
         {
+            int height = 0;
+            int index = i % GRIDSIZE;
+
             if (gameGrid[i].getGem() == null)
             {
                 int findUp = i - GRIDSIZE;
                 while (findUp >= 0)
                 {
+                    height++;
                     if (gameGrid[findUp].getGem() != null && gameGrid[findUp].getGemTransform() != null)
                     {
-                        /*Gem currGem = gameGrid[currIndex].getGem();
-                Gem upGem = gameGrid[upIndex].getGem();
-
-                Transform currGemTrans = gameGrid[currIndex].getGemTransform();
-                Transform upGemTrans = gameGrid[upIndex].getGemTransform();
-
-                currGemTrans.parent = gameGrid[upIndex].gameObject.transform;
-                upGemTrans.parent = gameGrid[currIndex].gameObject.transform;
-
-                gameGrid[upIndex].setGem(currGem);
-                gameGrid[currIndex].setGem(upGem);*/
 
                         Gem foundGem = gameGrid[findUp].getGem();
                         Transform foundTrans = gameGrid[findUp].getGemTransform();
@@ -298,7 +293,9 @@ public class GameGrid : MonoBehaviour
 
                 if (gameGrid[i].getGem() == null) //no gems available above
                 {
-                    gameGrid[i].randomGem(false);
+                    if (heights[index] == 0 && height != 0)
+                        heights[index] = height;
+                    gameGrid[i].randomGem(false, heights[index]);
                 }
             }
         }
@@ -318,7 +315,7 @@ public class GameGrid : MonoBehaviour
             while (indexEnum.MoveNext())
             {
                 int current = indexEnum.Current;
-                gameGrid[current].randomGem(true);
+                gameGrid[current].randomGem(true, 0);
             }
             /*
             for (int i = 0; i < indices.Count; i++)

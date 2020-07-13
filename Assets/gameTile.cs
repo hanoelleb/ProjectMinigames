@@ -105,7 +105,7 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
         bg.sprite = rep;
     }
 
-    public void randomGem(bool setUp)
+    public void randomGem(bool setUp, int height)
     {
         if (gem != null && gemTransform != null)
             Destroy(gem.gameObject);
@@ -113,7 +113,7 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
 
         //want to spawn above board;
         float xPos = transform.localPosition.x;
-        float yPos = transform.localPosition.y + 40;
+        float yPos = transform.localPosition.y + ((height + 1) * 17);
 
         if (setUp)
             gem = Instantiate(holding, transform.localPosition, Quaternion.identity);
