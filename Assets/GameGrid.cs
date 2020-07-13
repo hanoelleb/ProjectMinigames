@@ -14,10 +14,13 @@ public class GameGrid : MonoBehaviour
     gameTile[] gameGrid;
 
     [SerializeField]
+    GameObject destroyEffect;
+
+    [SerializeField]
     List<Sprite> backTileSprites;
 
     bool canClick = true;
-
+    bool checking = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +46,7 @@ public class GameGrid : MonoBehaviour
     {
         canClick = false;
         current = null;
+        checking = false;
 
         Gem currGem = gameGrid[currIndex].getGem();
         Gem upGem = gameGrid[upIndex].getGem();
@@ -63,12 +67,37 @@ public class GameGrid : MonoBehaviour
         Debug.Log("Finished Coroutine at timestamp : " + Time.time);
 
         canClick = true;
+        checking = true;
 
     }
 
-    IEnumerator DeleteCoroutine()
+    IEnumerator MoveDownCoroutine()
     {
+        checking = false;
+        yield return new WaitForSeconds(0.8f);
+        moveDown();
+
+        yield return new WaitForSeconds(0.8f);
+
+        checking = true;
+        HashSet<int> matches = checkBoard(false);
+        while (matches.Count != 0)
+        {
+            checking = false;
+            yield return new WaitForSeconds(0.8f);
+            moveDown();
+            yield return new WaitForSeconds(0.8f);
+            matches = checkBoard(false);
+        }
+
+        checking = true;
+    }
+
+    IEnumerator DeleteCoroutine(int current)
+    {
+
         yield return new WaitForSeconds(1.5f);
+        gameGrid[current].deleteGem();
     }
 
     public void setCurrent(gameTile update)
@@ -114,26 +143,9 @@ public class GameGrid : MonoBehaviour
                     StartCoroutine(NoMatchCoroutine(currIndex, upIndex));
                 else
                 {
-                    moveDown();
-
-                    while (matches.Count != 0)
-                    {
-                        matches = checkBoard(false);
-                        moveDown();
-                    }
+                    StartCoroutine(MoveDownCoroutine());
                 }
-                //swap back if no matches
-                /*
-                
-                if (matches.Count == 0)
-                {
-                    upGemTrans.parent = gameGrid[upIndex].gameObject.transform;
-                    currGemTrans.parent = gameGrid[currIndex].gameObject.transform;
-
-                    gameGrid[upIndex].setGem(upGem);
-                    gameGrid[currIndex].setGem(currGem);
-                }
-                */
+               
                 //currGem.gameObject.GetComponent<Gem>().setParent(upIndex);
                 /*
                 gameGrid[currIndex].setGem(gameGrid[upIndex].getGem());
@@ -158,47 +170,52 @@ public class GameGrid : MonoBehaviour
 
     HashSet<int> checkBoard(bool setup)
     {
-        HashSet<int> indices = new HashSet<int>();
-        for (int i = 0; i < gameGrid.Length; i++)
+        if (checking)
         {
-            
-            if (i - GRIDSIZE * 2 <= GRIDSIZE * GRIDSIZE && i < 24)
+            HashSet<int> indices = new HashSet<int>();
+            for (int i = 0; i < gameGrid.Length; i++)
             {
-                bool down = checkDown(i);
-                if (down)
-                {
-                    gameGrid[i].setBg(backTileSprites[1]);
-                    gameGrid[i + GRIDSIZE].setBg(backTileSprites[1]);
-                    gameGrid[i + GRIDSIZE * 2].setBg(backTileSprites[1]);
 
-                    indices.Add(i);
-                    indices.Add(i + GRIDSIZE);
-                    indices.Add(i + GRIDSIZE*2);
+                if (i - GRIDSIZE * 2 <= GRIDSIZE * GRIDSIZE && i < 24)
+                {
+                    bool down = checkDown(i);
+                    if (down)
+                    {
+                        gameGrid[i].setBg(backTileSprites[1]);
+                        gameGrid[i + GRIDSIZE].setBg(backTileSprites[1]);
+                        gameGrid[i + GRIDSIZE * 2].setBg(backTileSprites[1]);
+
+                        indices.Add(i);
+                        indices.Add(i + GRIDSIZE);
+                        indices.Add(i + GRIDSIZE * 2);
+                    }
                 }
+                if ((i + 1) % GRIDSIZE != 0 && (i + 2) % GRIDSIZE != 1 && i < 34)
+                {
+                    bool right = checkRight(i);
+                    if (right)
+                    {
+                        gameGrid[i].setBg(backTileSprites[1]);
+                        gameGrid[i + 1].setBg(backTileSprites[1]);
+                        gameGrid[i + 2].setBg(backTileSprites[1]);
+
+                        indices.Add(i);
+                        indices.Add(i + 1);
+                        indices.Add(i + 2);
+                    }
+                }
+
             }
-            if ((i + 1) % GRIDSIZE != 0 && (i + 2) % GRIDSIZE != 1 && i < 34)
+
+            if (!setup)
             {
-                bool right = checkRight(i);
-                if (right)
-                {
-                    gameGrid[i].setBg(backTileSprites[1]);
-                    gameGrid[i + 1].setBg(backTileSprites[1]);
-                    gameGrid[i + 2].setBg(backTileSprites[1]);
-
-                    indices.Add(i);
-                    indices.Add(i + 1);
-                    indices.Add(i + 2);
-                }
+                print("will remove");
+                removeBlocks(indices);
             }
-            
+            return indices;
         }
 
-        if (!setup)
-        {
-            print("will remove");
-            removeBlocks(indices);
-        }
-        return indices;
+        return new HashSet<int>();
     }
 
     bool checkDown(int index)
@@ -227,7 +244,12 @@ public class GameGrid : MonoBehaviour
         while (indexEnum.MoveNext())
         {
             int current = indexEnum.Current;
+            var pos = gameGrid[current].transform.position;
+            var newPos = new Vector3(pos.x, pos.y, 13);
+            GameObject particle = Instantiate(destroyEffect, newPos, Quaternion.identity);
+            Destroy(particle, 0.5f);
             gameGrid[current].deleteGem();
+            
         }
 
         //is repeating?

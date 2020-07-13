@@ -143,10 +143,10 @@ public class gameTile : MonoBehaviour, IPointerClickHandler
     public void deleteGem()
     {
         //if (gem && gem.gameObject)
- 
-        Destroy(gem.gameObject);
+        Destroy(gem.gameObject, 0.5f);
         gem = null;
         gemTransform = null;
+
     }
 
     void delete()
