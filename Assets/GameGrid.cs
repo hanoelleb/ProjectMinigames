@@ -55,7 +55,7 @@ public class GameGrid : MonoBehaviour
         Transform upGemTrans = gameGrid[upIndex].getGemTransform();
 
         //yield on a new YieldInstruction that waits for 5 seconds.
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
 
         currGemTrans.parent = gameGrid[upIndex].gameObject.transform;
         upGemTrans.parent = gameGrid[currIndex].gameObject.transform;
@@ -74,20 +74,21 @@ public class GameGrid : MonoBehaviour
     IEnumerator MoveDownCoroutine()
     {
         checking = false;
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(0.9f);
         moveDown();
 
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(0.9f);
 
         checking = true;
         HashSet<int> matches = checkBoard(false);
         while (matches.Count != 0)
         {
             checking = false;
-            yield return new WaitForSeconds(0.8f);
+            yield return new WaitForSeconds(0.9f);
             moveDown();
-            yield return new WaitForSeconds(0.8f);
-            matches = checkBoard(false);
+            yield return new WaitForSeconds(0.9f);
+            checking = true;
+            matches = checkBoard(false);   
         }
 
         checking = true;
