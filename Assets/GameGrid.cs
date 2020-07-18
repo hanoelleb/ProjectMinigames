@@ -7,11 +7,19 @@ public class GameGrid : MonoBehaviour
 {
     const int GRIDSIZE = 6;
 
+    int GEM_VALUE = 10;
+
     gameTile current;
 
 
     [SerializeField]
     gameTile[] gameGrid;
+
+    [SerializeField]
+    Score score;
+
+    [SerializeField]
+    Timer timer;
 
     [SerializeField]
     GameObject destroyEffect;
@@ -55,16 +63,13 @@ public class GameGrid : MonoBehaviour
         Transform upGemTrans = gameGrid[upIndex].getGemTransform();
 
         //yield on a new YieldInstruction that waits for 5 seconds.
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(0.5f);
 
         currGemTrans.parent = gameGrid[upIndex].gameObject.transform;
         upGemTrans.parent = gameGrid[currIndex].gameObject.transform;
 
         gameGrid[upIndex].setGem(currGem);
         gameGrid[currIndex].setGem(upGem);
-
-        //After we have waited 5 seconds print the time again.
-        Debug.Log("Finished Coroutine at timestamp : " + Time.time);
 
         canClick = true;
         checking = true;
@@ -146,20 +151,7 @@ public class GameGrid : MonoBehaviour
                 {
                     StartCoroutine(MoveDownCoroutine());
                 }
-               
-                //currGem.gameObject.GetComponent<Gem>().setParent(upIndex);
-                /*
-                gameGrid[currIndex].setGem(gameGrid[upIndex].getGem());
-                gameGrid[upIndex].setGem(temp1);
-                List<int> indices = checkBoard();
-                if (indices.Count == 0)
-                {
-                    //no match, switch back
-                    Gem temp2 = gameGrid[currIndex].getGem();
-                    gameGrid[currIndex].setGem(gameGrid[upIndex].getGem());
-                    gameGrid[upIndex].setGem(temp2);
-                }
-                */
+              
             }
         } 
         else
@@ -191,8 +183,11 @@ public class GameGrid : MonoBehaviour
                         indices.Add(i + GRIDSIZE * 2);
                     }
                 }
-                if ((i + 1) % GRIDSIZE != 0 && (i + 2) % GRIDSIZE != 1 && i < 34)
+                if ((i + 1) % GRIDSIZE != 0 &&  (i + 2) % GRIDSIZE != 1 &&
+                    (i + 1) % GRIDSIZE != 5 && (i + 2) % GRIDSIZE != 6 &&
+                    i < 34)
                 {
+
                     bool right = checkRight(i);
                     if (right)
                     {
@@ -249,6 +244,8 @@ public class GameGrid : MonoBehaviour
             var newPos = new Vector3(pos.x, pos.y, 13);
             GameObject particle = Instantiate(destroyEffect, newPos, Quaternion.identity);
             Destroy(particle, 0.5f);
+            score.addToScore(GEM_VALUE);
+            timer.addToTime(1);
             gameGrid[current].deleteGem();
             
         }
