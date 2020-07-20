@@ -22,6 +22,9 @@ public class GameGrid : MonoBehaviour
     GameOver gameover;
 
     [SerializeField]
+    GameObject noMoves;
+
+    [SerializeField]
     Timer timer;
 
     [SerializeField]
@@ -41,6 +44,8 @@ public class GameGrid : MonoBehaviour
 
     bool canClick = true;
     bool checking = true;
+
+    bool paused = false;
     // Start is called before the first frame update
     void Awake()
     {
@@ -73,7 +78,7 @@ public class GameGrid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!timer.getRunning())
+        if (!timer.getRunning() && !paused)
         {
             endOfGame();
         }
@@ -134,7 +139,9 @@ public class GameGrid : MonoBehaviour
 
         checking = true;
         canClick = true;
-        print("moves available: " + checkAnyMoves());
+        bool moreMoves = checkAnyMoves();
+        if (!moreMoves)
+            handleNoMoves();
     }
 
     void endOfGame()
@@ -358,6 +365,8 @@ public class GameGrid : MonoBehaviour
         {
             return false;
         }
+        if (paused)
+            paused = false;
         return true;
     }
 
@@ -370,6 +379,11 @@ public class GameGrid : MonoBehaviour
     {
         timer.resetTime();
         score.resetScore();
+        resetBoard();
+    }
+
+    public void resetBoard()
+    {
         for (int i = 0; i < gameGrid.Length; i++)
         {
             gameGrid[i].setBg(backTileSprites[0]);
@@ -452,38 +466,6 @@ public class GameGrid : MonoBehaviour
         return noMoves;
     }
 
-    bool checkVert(int column, gameTile[] board)
-    {
-        int count = 1;
-        int x = 0;
-        int y = 1;
-
-        int[] indices = new int[GRIDSIZE];
-        for (int i = 0; i < GRIDSIZE; i++)
-        {
-            indices[i] = column + (i * GRIDSIZE);
-        }
-
-        while (x < indices.Length)
-        {
-            if (board[indices[x]].getGemVal() == board[indices[y]].getGemVal())
-            {
-                y++;
-                count++;
-                if (count == 3) return true;
-            } else
-            {
-                count = 1;
-                x++;
-                y = x + 1;
-                if (!(y < indices.Length - 1))
-                    break;
-            }
-        }
-
-        return false;
-    }
-
     int getRowNum(int i)
     {
         int rowNum = 0;
@@ -517,6 +499,38 @@ public class GameGrid : MonoBehaviour
         return rowNum;
     }
 
+    bool checkVert(int column, gameTile[] board)
+    {
+        int count = 1;
+        int x = 0;
+        int y = 1;
+
+        int[] indices = new int[GRIDSIZE];
+        for (int i = 0; i < GRIDSIZE; i++)
+        {
+            indices[i] = column + (i * GRIDSIZE);
+        }
+
+        while (x < indices.Length)
+        {
+            if (board[indices[x]].getGemVal() == board[indices[y]].getGemVal())
+            {
+                y++;
+                count++;
+                if (count == 3) return true;
+            } else
+            {
+                count = 1;
+                x++;
+                y = x + 1;
+                if (!(y < indices.Length - 1))
+                    break;
+            }
+        }
+
+        return false;
+    }
+
     bool checkHori(int row, gameTile[] board)
     {
         int count = 1;
@@ -543,6 +557,13 @@ public class GameGrid : MonoBehaviour
         }
 
         return false;
+    }
+
+    void handleNoMoves()
+    {
+        paused = true;
+        timer.pause();
+        noMoves.SetActive(true);
     }
 
 }

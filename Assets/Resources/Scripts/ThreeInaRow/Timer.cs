@@ -67,4 +67,14 @@ public class Timer : MonoBehaviour
         timeRemaining = STARTING_TIME;
         running = true;
     }
+
+    public void pause()
+    {
+        running = false;
+    }
+
+    public void unpause()
+    {
+        running = true;
+    }
 }
