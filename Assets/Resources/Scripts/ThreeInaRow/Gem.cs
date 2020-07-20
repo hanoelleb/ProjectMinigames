@@ -25,7 +25,7 @@ public class Gem : MonoBehaviour
     {
         if (transform.position != transform.parent.position)
         {
-            transform.position = Vector3.MoveTowards(transform.position, transform.parent.position, 0.2f);
+            transform.position = Vector3.MoveTowards(transform.position, transform.parent.position, 0.4f);
             isMoving = true;
         } else
         {
