@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
+    float STARTING_TIME = 61;
+
     [SerializeField]
     Text timerText;
 
@@ -14,7 +16,7 @@ public class Timer : MonoBehaviour
 
     void Start()
     {
-         timeRemaining = 60;
+         timeRemaining = STARTING_TIME;
 
          timeRemaining -= Time.deltaTime;
          float minutes = Mathf.FloorToInt(timeRemaining / 60);
@@ -28,7 +30,7 @@ public class Timer : MonoBehaviour
     {
         if (running)
         {
-            if (timeRemaining > 0)
+            if (timeRemaining > 1)
             {
                 timeRemaining -= Time.deltaTime;
                 float minutes = Mathf.FloorToInt(timeRemaining / 60);
@@ -51,5 +53,16 @@ public class Timer : MonoBehaviour
     public float getTimeLeft()
     {
         return timeRemaining;
+    }
+
+    public bool getRunning()
+    {
+        return running;
+    }
+
+    public void resetTime()
+    {
+        timeRemaining = STARTING_TIME;
+        running = true;
     }
 }

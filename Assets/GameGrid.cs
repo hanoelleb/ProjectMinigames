@@ -19,6 +19,9 @@ public class GameGrid : MonoBehaviour
     Score score;
 
     [SerializeField]
+    GameOver gameover;
+
+    [SerializeField]
     Timer timer;
 
     [SerializeField]
@@ -26,6 +29,15 @@ public class GameGrid : MonoBehaviour
 
     [SerializeField]
     List<Sprite> backTileSprites;
+
+    [SerializeField]
+    AudioSource gemSwap;
+
+    [SerializeField]
+    AudioSource noMatch;
+
+    [SerializeField]
+    AudioSource gemPop;
 
     bool canClick = true;
     bool checking = true;
@@ -47,7 +59,10 @@ public class GameGrid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-           
+        if (!timer.getRunning())
+        {
+            endOfGame();
+        }
     }
 
     IEnumerator NoMatchCoroutine(int currIndex, int upIndex)
@@ -55,6 +70,8 @@ public class GameGrid : MonoBehaviour
         canClick = false;
         current = null;
         checking = false;
+
+        
 
         Gem currGem = gameGrid[currIndex].getGem();
         Gem upGem = gameGrid[upIndex].getGem();
@@ -71,6 +88,8 @@ public class GameGrid : MonoBehaviour
         gameGrid[upIndex].setGem(currGem);
         gameGrid[currIndex].setGem(upGem);
 
+        noMatch.Play();
+
         canClick = true;
         checking = true;
 
@@ -78,11 +97,14 @@ public class GameGrid : MonoBehaviour
 
     IEnumerator MoveDownCoroutine()
     {
+        canClick = false;
         checking = false;
         yield return new WaitForSeconds(0.9f);
+        gemPop.Play();
         moveDown();
 
         yield return new WaitForSeconds(0.9f);
+        
 
         checking = true;
         HashSet<int> matches = checkBoard(false);
@@ -90,6 +112,7 @@ public class GameGrid : MonoBehaviour
         {
             checking = false;
             yield return new WaitForSeconds(0.9f);
+            gemPop.Play();
             moveDown();
             yield return new WaitForSeconds(0.9f);
             checking = true;
@@ -97,6 +120,7 @@ public class GameGrid : MonoBehaviour
         }
 
         checking = true;
+        canClick = true;
     }
 
     IEnumerator DeleteCoroutine(int current)
@@ -104,6 +128,12 @@ public class GameGrid : MonoBehaviour
 
         yield return new WaitForSeconds(1.5f);
         gameGrid[current].deleteGem();
+    }
+
+    void endOfGame()
+    {
+        gameover.setScore(score.getScore());
+        gameover.activate(true);
     }
 
     public void setCurrent(gameTile update)
@@ -120,7 +150,6 @@ public class GameGrid : MonoBehaviour
                  (upIndex == currIndex - GRIDSIZE || upIndex == currIndex + GRIDSIZE))  //top or bottom
             {
                 isAdjacent = true;
-                print("isAdjacent");
                 current.setSelected(false);
                 current = null;
             }
@@ -140,6 +169,8 @@ public class GameGrid : MonoBehaviour
 
                 currGemTrans.parent = gameGrid[upIndex].gameObject.transform;
                 upGemTrans.parent = gameGrid[currIndex].gameObject.transform;
+
+                gemSwap.Play();
 
                 gameGrid[upIndex].setGem(currGem);
                 gameGrid[currIndex].setGem(upGem);
@@ -328,6 +359,18 @@ public class GameGrid : MonoBehaviour
     public bool getCanClick()
     {
         return canClick;
+    }
+
+    public void resetGame()
+    {
+        timer.resetTime();
+        score.resetScore();
+        for (int i = 0; i < gameGrid.Length; i++)
+        {
+            gameGrid[i].randomGem(true, 0);
+        }
+
+        setUp();
     }
 
 }

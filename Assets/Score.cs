@@ -27,9 +27,14 @@ public class Score : MonoBehaviour
         score += num;
     }
 
-    void resetScore()
+    public void resetScore()
     {
         score = 0;
+    }
+
+    public int getScore()
+    {
+        return score;
     }
 
 
