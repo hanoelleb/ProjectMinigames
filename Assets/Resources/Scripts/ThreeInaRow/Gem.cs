@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Gem : MonoBehaviour
 {
+    float SPEED = 0.6f;
+
     [SerializeField]
     int parent;
 
@@ -25,7 +27,7 @@ public class Gem : MonoBehaviour
     {
         if (transform.position != transform.parent.position)
         {
-            transform.position = Vector3.MoveTowards(transform.position, transform.parent.position, 0.4f);
+            transform.position = Vector3.MoveTowards(transform.position, transform.parent.position, SPEED);
             isMoving = true;
         } else
         {

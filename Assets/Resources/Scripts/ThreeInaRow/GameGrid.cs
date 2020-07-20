@@ -363,6 +363,7 @@ public class GameGrid : MonoBehaviour
             }
         } catch (Exception e)
         {
+            print("error");
             return false;
         }
         if (paused)
